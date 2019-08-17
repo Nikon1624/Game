@@ -35,11 +35,10 @@ body {
   margin: 0;
   margin-bottom: 40px;
   padding: 0;
-  list-style: none;
   box-shadow: 0 0 0 2px #000000;
 }
 
-.game__item {
+.game__cell {
   width: 140px;
   height: 140px;
   flex-grow: 1;
@@ -48,46 +47,46 @@ body {
   transition: 0.4s;
 }
 
-.game__item:hover {
-  background-color: rgba(0, 0, 0, 0.2);
+.game__cell:hover {
+  background-color: rgba(0, 0, 0, 0.1);
 }
 
-.game__item--player, .game__item--pc {
+.game__cell--player, .game__cell--pc {
   position: relative;
 }
 
-.game__item--player::before {
+.game__cell--player::before {
   content: "";
   position: absolute;
   left: calc(50% - 50px);
   top: calc(50% - 2px);
   width: 100px;
   height: 4px;
-  background-color: #000000;
+  background-color: #464646;
   transform: rotate(-45deg);
   border-radius: 3px;
 }
 
-.game__item--player::after {
+.game__cell--player::after {
   content: "";
   position: absolute;
   left: calc(50% - 50px);
   top: calc(50% - 2px);
   width: 100px;
   height: 4px;
-  background-color: #000000;
+  background-color: #464646;
   transform: rotate(45deg);
   border-radius: 3px;
 }
 
-.game__item--pc::before {
+.game__cell--pc::before {
   content: "";
   position: absolute;
   left: calc(50% - 52px);
   top: calc(50% - 52px);
   width: 100px;
   height: 100px;
-  border: 3px solid #000000;
+  border: 3px solid #464646;
   border-radius: 50%;
 }
 
@@ -101,6 +100,10 @@ body {
   background-color: transparent;
   transition: 0.2s;
   outline: none;
+}
+
+.game__reset:hover {
+  border-color: #706f6f;
 }
 
 .game__reset:active {
