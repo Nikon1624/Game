@@ -22,9 +22,15 @@ body {
 
 .game__title {
   margin: 0;
-  margin-bottom: 40px;
+  margin-bottom: 15px;
   font-size: 40px;
   font-weight: 400;
+}
+
+.game__scores {
+  margin: 0;
+  padding: 0;
+  margin-bottom: 40px;
 }
 
 .game__field {
@@ -53,6 +59,10 @@ body {
 
 .game__cell--player, .game__cell--pc {
   position: relative;
+}
+
+.game__cell--win {
+  box-shadow: inset 0 0 3px 3px rgba(248, 3, 3, 0.705);
 }
 
 .game__cell--player::before {
