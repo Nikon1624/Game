@@ -14,173 +14,92 @@ const gameFieldWidth = Math.sqrt(cells.length);
 const CROSS_INDEX = 0;
 const ZERO_INDEX = 1;
 let isCross = true;
+const winCombs = [
+    "111000000", "000111000", "000000111",
+    "100100100", "010010010", "001001001",
+    "100010001", "001010100",
+];
+let crossBits = "000000000";
+let zeroBits = "000000000";
 
-for (let cell of cells) {
-  cell.addEventListener('click', () => {
-    if ( !cell.classList.contains(CROSS_CLASS) && !cell.classList.contains(ZERO_CLASS) ) {
-      
-      isCross ? cell.classList.add(CROSS_CLASS) : cell.classList.add(ZERO_CLASS);
+function replaceAt(str, index) {
+    return str.substr(0, index) + "1" + str.substr(index + 1);
+}
 
-      isCross = !isCross;
+for (let i = 0; i < cells.length; i++) {
+    const cell = cells[i];
+    cell.addEventListener('click', () => {
+        if (!cell.classList.contains(CROSS_CLASS) && !cell.classList.contains(ZERO_CLASS)) {
 
-      checkWinner();
+            if (isCross) {
+                cell.classList.add(CROSS_CLASS);
+                crossBits = replaceAt(crossBits, i);
+            } else {
+                cell.classList.add(ZERO_CLASS);
+                zeroBits = replaceAt(zeroBits, i);
+            }
 
-      if ( checkDraw() ) {
-        showWinMessage('Ничья');
-      }
-    }
-  });
+            isCross = !isCross;
+
+            if (checkWinner(crossBits)) {
+                addScore(CROSS_INDEX);
+                showWinMessage('Крестики победили!');
+            } else if (checkWinner(zeroBits)) {
+                addScore(CROSS_INDEX);
+                showWinMessage('Нолики победили!');
+            }
+
+            if (checkDraw()) {
+                showWinMessage('Ничья');
+            }
+        }
+    });
 }
 
 reset.addEventListener('click', () => {
-  for (let cell of cells) {
-    cell.classList.remove(CROSS_CLASS);
-    cell.classList.remove(ZERO_CLASS);
-    cell.classList.remove(WIN_CLASS);
-    winMessageWrapper.classList.remove(MESSAGE_SHOW_CLASS);
-  }
+    for (let cell of cells) {
+        cell.classList.remove(CROSS_CLASS);
+        cell.classList.remove(ZERO_CLASS);
+        cell.classList.remove(WIN_CLASS);
+        winMessageWrapper.classList.remove(MESSAGE_SHOW_CLASS);
+        crossBits = "000000000";
+        zeroBits = "000000000";
+    }
 });
 
-function checkWinner() {
-  for (let i = 0; i < gameFieldWidth; i++) {
-    let colArr = [];
-  
-    for (let j = i; j < cells.length; j += gameFieldWidth) {
-      colArr.push(cells[j]);
-    }
-  
-    if ( checkClass(colArr, CROSS_CLASS) ) {
-      for (let key in colArr) {
-        addWinClass(colArr[key]);
-      }
-      
-      addScore(CROSS_INDEX);
-      showWinMessage('Крестики победили!');
-  
-      break;
-    }
-  
-    if ( checkClass(colArr, ZERO_CLASS) ) {
-      for (let key in colArr) {
-        addWinClass(colArr[key]);
-      }
-  
-      addScore(ZERO_INDEX);
-      showWinMessage('Нолики победили!');
-  
-      break;
-    }
-  }
-
-  for (let i = 0; i <= cells.length - gameFieldWidth; i += gameFieldWidth) {
-
-    let rowArr = [];
-
-    for (let j = i; j < i + gameFieldWidth; j++) {
-      rowArr.push(cells[j])
-    }
-
-    if ( checkClass(rowArr, CROSS_CLASS) ) {
-      for (let key in rowArr) {
-        addWinClass(rowArr[key]);
-      }
-    
-      addScore(CROSS_INDEX);
-      showWinMessage('Крестики победили!');
-    
-      break;
-    }
-    
-    if ( checkClass(rowArr, ZERO_CLASS) ) {
-      for (let key in rowArr) {
-        addWinClass(rowArr[key]);
-      }
-    
-      addScore(ZERO_INDEX);
-      showWinMessage('Нолики победили!');
-    
-      break;
-    }
-  }
-
-  let rightDiagonal = [];
-
-  for (let i = gameFieldWidth - 1; i <= cells.length - gameFieldWidth; i += (gameFieldWidth - 1)) {
-    rightDiagonal.push(cells[i]);
-  }
-
-  if ( checkClass(rightDiagonal, CROSS_CLASS) ) {
-    for (let key in rightDiagonal) {
-      addWinClass(rightDiagonal[key]);
-    }
-
-    addScore(CROSS_INDEX);
-    showWinMessage('Крестики победили!');
-  }
-
-  if ( checkClass(rightDiagonal, ZERO_CLASS) ) {
-    for (let key in rightDiagonal) {
-      addWinClass(rightDiagonal[key]);
-    }
-
-    addScore(ZERO_INDEX);
-    showWinMessage('Нолики победили!');
-  }
-
-  let leftDiagonal = [];
-
-  for (let i = 0; i <= cells.length; i += (gameFieldWidth + 1)) {
-    leftDiagonal.push(cells[i]);
-  }
-
-  if ( checkClass(leftDiagonal, CROSS_CLASS) ) {
-    for (let key in leftDiagonal) {
-      addWinClass(leftDiagonal[key]);
-    }
-
-    addScore(CROSS_INDEX);
-    showWinMessage('Крестики победили!');
-  }
-
-  if ( checkClass(leftDiagonal, ZERO_CLASS) ) {
-    for (let key in leftDiagonal) {
-      addWinClass(leftDiagonal[key]);
-    }
-
-    addScore(ZERO_INDEX);
-    showWinMessage('Нолики победили!');
-  }
+function checkWinner(bits) {
+    return winCombs.some(elem => (parseInt(bits, 2) & parseInt(elem, 2)) === parseInt(elem, 2));
 }
 
 function checkDraw() {
-  for (let cell of cells) {
-    if (cell.classList.length == 1) {
-      return false;
+    for (let cell of cells) {
+        if (cell.classList.length === 1) {
+            return false;
+        }
     }
-  }
 
-  if ( !winMessageWrapper.classList.contains(MESSAGE_SHOW_CLASS) ) {
-    return true;
-  }
+    if (!winMessageWrapper.classList.contains(MESSAGE_SHOW_CLASS)) {
+        return true;
+    }
 }
 
 function showWinMessage(message) {
-  winMessage.textContent = message;
-  winMessageWrapper.classList.add(MESSAGE_SHOW_CLASS);
+    winMessage.textContent = message;
+    winMessageWrapper.classList.add(MESSAGE_SHOW_CLASS);
 }
 
 function checkClass(arr, className) {
-  return arr.every(item => item.classList.contains(className) ? true : false);
+    return arr.every(item => item.classList.contains(className));
 }
 
 function addWinClass(el) {
-  el.classList.add(WIN_CLASS);
+    el.classList.add(WIN_CLASS);
 }
 
 function addScore(index) {
-  let scoresText = scores.textContent.split(':');
+    let scoresText = scores.textContent.split(':');
 
-  scoresText[index] = scoresText[index].split(' ').map(item => !isNaN(item) ? ++item : item).join(' ');
+    scoresText[index] = scoresText[index].split(' ').map(item => !isNaN(item) ? ++item : item).join(' ');
 
-  scores.textContent = scoresText.join(':');
+    scores.textContent = scoresText.join(':');
 }
