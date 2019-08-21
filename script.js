@@ -13,20 +13,41 @@ const MESSAGE_SHOW_CLASS = 'game__win-message-wrapper--show';
 const gameFieldWidth = Math.sqrt(cells.length);
 const CROSS_INDEX = 0;
 const ZERO_INDEX = 1;
+const winCombinations = [
+  '111000000', '000111000', '000000111', '100100100', '010010010', '001001001', '100010001', '001010100'
+];
+let crossPosition = '000000000';
+let zeroPosition = '000000000';
 let isCross = true;
 
-for (let cell of cells) {
-  cell.addEventListener('click', () => {
-    if ( !cell.classList.contains(CROSS_CLASS) && !cell.classList.contains(ZERO_CLASS) ) {
-      
-      isCross ? cell.classList.add(CROSS_CLASS) : cell.classList.add(ZERO_CLASS);
+for (let i = 0; i < cells.length; i++) {
+  cells[i].addEventListener('click', () => {
+    if (!cells[i].classList.contains(ZERO_CLASS) && !cells[i].classList.contains(CROSS_CLASS)) {
+      if (isCross) {
+        cells[i].classList.add(CROSS_CLASS);
+        crossPosition = replaceAt(crossPosition, i);
+      } else {
+        cells[i].classList.add(ZERO_CLASS);
+        zeroPosition = replaceAt(zeroPosition, i);
+      }
 
       isCross = !isCross;
 
-      checkWinner();
+      let crossResult = checkWinner(crossPosition);
+      let zeroResult = checkWinner(zeroPosition);
 
-      if ( checkDraw() ) {
-        showWinMessage('Ничья');
+      if (crossResult) {
+        printWinCells(crossResult);
+        showWinMessage('Крестики победили!');
+        addScore(CROSS_INDEX);
+      } else if (zeroResult) {
+        printWinCells(zeroResult);
+        showWinMessage('Нолики победили!');
+        addScore(ZERO_INDEX);
+      }
+
+      if (checkDraw()) {
+        showWinMessage('Ничья!');
       }
     }
   });
@@ -38,117 +59,28 @@ reset.addEventListener('click', () => {
     cell.classList.remove(ZERO_CLASS);
     cell.classList.remove(WIN_CLASS);
     winMessageWrapper.classList.remove(MESSAGE_SHOW_CLASS);
+    crossPosition = '000000000';
+    zeroPosition = '000000000';
   }
 });
 
-function checkWinner() {
-  for (let i = 0; i < gameFieldWidth; i++) {
-    let colArr = [];
-  
-    for (let j = i; j < cells.length; j += gameFieldWidth) {
-      colArr.push(cells[j]);
+function replaceAt(str, index) {
+  return `${str.slice(0, index)}1${str.slice(index + 1)}`;
+}
+
+function checkWinner(position) {
+  let isWin = winCombinations.find(item => (parseInt(item, 2) & parseInt(position, 2)) == parseInt(item, 2));
+
+  if (isWin) return isWin;
+
+  return false;
+}
+
+function printWinCells(winPositions) {
+  for (let i = 0; i < cells.length; i++) {
+    if (winPositions[i] == 1) {
+      cells[i].classList.add(WIN_CLASS);
     }
-  
-    if ( checkClass(colArr, CROSS_CLASS) ) {
-      for (let key in colArr) {
-        addWinClass(colArr[key]);
-      }
-      
-      addScore(CROSS_INDEX);
-      showWinMessage('Крестики победили!');
-  
-      break;
-    }
-  
-    if ( checkClass(colArr, ZERO_CLASS) ) {
-      for (let key in colArr) {
-        addWinClass(colArr[key]);
-      }
-  
-      addScore(ZERO_INDEX);
-      showWinMessage('Нолики победили!');
-  
-      break;
-    }
-  }
-
-  for (let i = 0; i <= cells.length - gameFieldWidth; i += gameFieldWidth) {
-
-    let rowArr = [];
-
-    for (let j = i; j < i + gameFieldWidth; j++) {
-      rowArr.push(cells[j])
-    }
-
-    if ( checkClass(rowArr, CROSS_CLASS) ) {
-      for (let key in rowArr) {
-        addWinClass(rowArr[key]);
-      }
-    
-      addScore(CROSS_INDEX);
-      showWinMessage('Крестики победили!');
-    
-      break;
-    }
-    
-    if ( checkClass(rowArr, ZERO_CLASS) ) {
-      for (let key in rowArr) {
-        addWinClass(rowArr[key]);
-      }
-    
-      addScore(ZERO_INDEX);
-      showWinMessage('Нолики победили!');
-    
-      break;
-    }
-  }
-
-  let rightDiagonal = [];
-
-  for (let i = gameFieldWidth - 1; i <= cells.length - gameFieldWidth; i += (gameFieldWidth - 1)) {
-    rightDiagonal.push(cells[i]);
-  }
-
-  if ( checkClass(rightDiagonal, CROSS_CLASS) ) {
-    for (let key in rightDiagonal) {
-      addWinClass(rightDiagonal[key]);
-    }
-
-    addScore(CROSS_INDEX);
-    showWinMessage('Крестики победили!');
-  }
-
-  if ( checkClass(rightDiagonal, ZERO_CLASS) ) {
-    for (let key in rightDiagonal) {
-      addWinClass(rightDiagonal[key]);
-    }
-
-    addScore(ZERO_INDEX);
-    showWinMessage('Нолики победили!');
-  }
-
-  let leftDiagonal = [];
-
-  for (let i = 0; i <= cells.length; i += (gameFieldWidth + 1)) {
-    leftDiagonal.push(cells[i]);
-  }
-
-  if ( checkClass(leftDiagonal, CROSS_CLASS) ) {
-    for (let key in leftDiagonal) {
-      addWinClass(leftDiagonal[key]);
-    }
-
-    addScore(CROSS_INDEX);
-    showWinMessage('Крестики победили!');
-  }
-
-  if ( checkClass(leftDiagonal, ZERO_CLASS) ) {
-    for (let key in leftDiagonal) {
-      addWinClass(leftDiagonal[key]);
-    }
-
-    addScore(ZERO_INDEX);
-    showWinMessage('Нолики победили!');
   }
 }
 
@@ -159,7 +91,7 @@ function checkDraw() {
     }
   }
 
-  if ( !winMessageWrapper.classList.contains(MESSAGE_SHOW_CLASS) ) {
+  if (!winMessageWrapper.classList.contains(MESSAGE_SHOW_CLASS)) {
     return true;
   }
 }
@@ -167,14 +99,6 @@ function checkDraw() {
 function showWinMessage(message) {
   winMessage.textContent = message;
   winMessageWrapper.classList.add(MESSAGE_SHOW_CLASS);
-}
-
-function checkClass(arr, className) {
-  return arr.every(item => item.classList.contains(className) ? true : false);
-}
-
-function addWinClass(el) {
-  el.classList.add(WIN_CLASS);
 }
 
 function addScore(index) {
